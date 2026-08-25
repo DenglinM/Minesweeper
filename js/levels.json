@@ -1,0 +1,5 @@
+[
+  {"id":1,"name":"初级","rows":9,"cols":9,"mines":10},
+  {"id":2,"name":"中级","rows":16,"cols":16,"mines":40},
+  {"id":3,"name":"高级","rows":16,"cols":30,"mines":99}
+]
