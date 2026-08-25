@@ -1,0 +1,12 @@
+/* styles.css */
+body { font-family: sans-serif; text-align: center; }
+#controls { margin: 10px; }
+#board { display: inline-grid; border: 2px solid #999; }
+.cell {
+  width: 30px; height: 30px;
+  border: 1px solid #ccc; line-height: 30px;
+  font-size: 20px; cursor: pointer;
+  user-select: none;
+}
+.cell.revealed { background: #eee; cursor: default; }
+.cell.flagged { background: #f99; }
