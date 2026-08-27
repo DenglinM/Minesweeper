@@ -1,21 +1,73 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>简易扫雷示例</title>
+  <meta http-equiv="X-UA-Comptatible" content="IE=edge">
+  <meta http-equiv="Content-Language" content="zh-CN">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="rating" content="Safe For Kids">
+  <meta property="og:type" content="game">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:site_name" content="简易扫雷示例">
   <link rel="stylesheet" href="css\style.css">
-</head>
-<body>
-  <h1>简易扫雷游戏</h1>
-  <div id="controls">
-    <button id="restart">重新开始</button>
-    <span>雷数: <span id="mines-left">0</span></span>
-    <span>时间: <span id="timer">0</span>秒</span>
-  </div>
-  <div id="board"></div>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="css\style_tags.css">
+  <!-- template-extra-tags -->
+  <link rel="icon" href="img\icons\logo.png">
+  <meta name="apple-mobile-web-app-title" content="简易扫雷示例">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-config" content="img\icons\browserconfig.xml">
+  <meta name="theme-color" content="#464B71">
+  <!-- head_scripts -->
+  <script type="text\javascript" async src="https://www.googletagmanager.com/gtag/js?id=G-B3VTSE8HXJ&cx=c&gtm=4e68p1"></script>
+  <script type="text\javascript" async src="https://www.google-analytics.com/analytics.js"></script>
+  <script>
+    window.authreq=new XMLHttpRequest();
+    window.authreq.open("GET",'/authorize?session=' + 
+    (localStorage['_session']?localStorage['_session']: '' ),true);window.authreq.send();
+  </script>
+  <!-- head_scripts_end -->
+   <script src="chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/js/recordConsoleEvents.js">
+   </script>
+   <style id="_goober">
+     @keyframes go2264125279 {
+       from {
+         transform: scale(0) rotate(45deg);
+         opacity: 0;
+       }
 
-  <script src="js\game.js"></script>
+       to {
+         transform: scale(1) rotate(45deg);
+         opacity: 1;
+       }
+     }
+   </style>
+   <link id="fitebone" rel="stylesheet" type="text/css" href="\css\fitebone-995.css" media="all">
+   <script src="https://www.googletagmanager.com/gtag/js?id=UA-69496894-1"></script>
+   <meta property="og:title" content="简易扫雷示例">
+   <meta name="description" content="简易扫雷示例">
+   <meta property="og:description" content="简易扫雷示例">
+   <link rel="image_src" href="img\icons\logo.png">
+<meta property="og:image" content="img\icons\logo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://minesweeper.online/cn/game/6484541118">
+<style id="container_extra_style">.container {max-width: 100%;}</style>
+</head>
+<body class="yay-hide">
+    <div id="shadow"></div>
+  <header id="header" class="header" role="banner">
+    <div class="navbar-desktop hidden-xs hidden-sm">
+      <div class="container">
+        <a class="brand-link pull-left" href="/" aria-label="简易扫雷示例">
+            <div class="brand-text pull-left">Minesweeper</div>
+        </a>
+      </nav>
+    </div> 
+
 </body>
 </html>
