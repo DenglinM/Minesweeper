@@ -1,0 +1,8 @@
+{
+  "name": "huanmian-minesweeper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test", "start": "node tools/serve.mjs", "verify": "node tools/verify-levels.mjs" },
+  "engines": { "node": ">=20" }
+}

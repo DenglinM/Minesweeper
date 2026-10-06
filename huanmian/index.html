@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f2ec">
+  <meta name="description" content="换面：一部关于认知的扫雷游戏。从数字、安全数到图形、概率、方向与空间，重新理解每一条线索。">
+  <title>换面 · 重新理解扫雷</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#board">跳到棋盘</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="换面首页"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>换面<small>HUAN MIAN</small></span></a>
+    <div class="header-caption">一个关于确定与不确定的扫雷实验</div>
+    <nav aria-label="主导航"><button class="plain-btn" id="map-open">章节地图 <span aria-hidden="true">↗</span></button><button class="icon-btn" id="sound-toggle" aria-label="开启音效" aria-pressed="false" title="音效">♪</button><button class="icon-btn" id="help-open" aria-label="游戏说明" title="游戏说明">?</button></nav>
+  </header>
+  <main class="shell">
+    <section class="intro" aria-labelledby="intro-title">
+      <div><div class="eyebrow"><span class="status-dot"></span> PERCEPTION LAB / 认知实验室</div><h1 id="intro-title">你熟悉扫雷。<br><em>直到规则换了一面。</em></h1><p>本关的雷位不会变。变的是，你理解它的方式。</p></div>
+      <div class="intro-note"><span class="note-index">01—06</span><p>从局部数字，到整体关系。<br>六种视角，一次重新认识。</p><button class="text-link" id="explore-open">选择一个实验 <span aria-hidden="true">→</span></button></div>
+    </section>
+    <div class="chapter-strip" id="chapter-strip" aria-label="章节进度"></div>
+    <section class="workspace" aria-label="游戏实验">
+      <div class="play-panel">
+        <div class="play-heading"><div><div class="eyebrow" id="level-index">EXPERIMENT 01 / 24</div><h2 id="level-title">正在准备棋盘</h2></div><button class="icon-btn reset-btn" id="restart" aria-label="重新开始本关" title="重新开始本关">↻</button></div>
+        <p class="level-description" id="level-description"></p>
+        <div class="board-wrap" id="board-wrap">
+          <div class="board-metadata"><span id="board-rule-label"></span><span id="board-total"></span></div>
+          <div id="board" class="board" role="group" aria-label="扫雷棋盘" tabindex="-1"></div>
+          <div class="spatial-controls" id="spatial-controls" hidden><button data-rotate="-1" aria-label="向左旋转视角">↶ 向左</button><button data-rotate="1" aria-label="向右旋转视角">向右 ↷</button><button id="spatial-reset">复位</button><label><input id="spatial-layers" type="checkbox"> 分层显示</label></div>
+          <div class="board-caption"><span><i class="legend-square"></i> 未知</span><span><i class="legend-square opened"></i> 已确认安全</span><span><i class="legend-square confirmed-mine"></i> 已确认雷</span><span>⚑ / ✓ 只是笔记</span><span id="neighbor-caption">选中一格，看看它真正的邻居。</span></div>
+        </div>
+        <div class="action-bar"><div class="tool-switch" role="group" aria-label="笔记工具"><button id="tool-open" class="active" aria-pressed="true"><span aria-hidden="true">◇</span> 打开</button><button id="tool-mark" aria-pressed="false"><span aria-hidden="true">⚑</span> <span id="mark-label">标雷</span></button></div><button class="small-btn" id="undo" title="只撤销笔记；已确认事实保留">↶ 撤销笔记</button><button class="small-btn" id="hint"><span aria-hidden="true">✧</span> 给我一点提示</button></div>
+        <div id="scan-controls" class="scan-controls" hidden><label for="scan-region">获取新证据</label><select id="scan-region" aria-label="选择采样区域"></select><button id="scan" class="dark-btn">无伤采样 <span aria-hidden="true">↗</span></button><button class="small-btn" id="batch-safe">整理确定安全格</button></div>
+        <div id="view-controls" class="view-controls" hidden><span>同一事实，两种表达</span><button data-view="normal">邻雷数</button><button data-view="negative">安全数</button></div>
+        <div class="message" id="message" role="status" aria-live="polite"></div>
+        <div class="play-footer"><span>左键打开 · 右键记笔记 · 方向键移动 · F 标记</span><span id="saved-indicator">进度保存在此浏览器</span></div>
+      </div>
+      <aside class="notebook" aria-label="实验笔记">
+        <div class="notebook-heading"><span class="eyebrow">FIELD NOTES</span><span aria-hidden="true">✳</span></div>
+        <div class="rule-number" id="chapter-number">01</div><h3 id="rule-title">数字是可靠的关系</h3><p id="rule-text"></p>
+        <div class="rule-divider"></div>
+        <div class="stat-row"><span>已打开的安全格</span><strong id="opened-count">0 / 0</strong></div><div class="progress-track"><span id="progress-fill"></span></div>
+        <div class="stat-row"><span>本关误判</span><strong id="mistake-count">0</strong></div><div class="stat-row" id="scan-stat" hidden><span>获取证据</span><strong id="scan-count">0 次</strong></div>
+        <div id="context-box" class="context-box"><span class="eyebrow">OBSERVATION</span><p id="context-text">数字统计周围八方向中的雷。先找一个可以确定的安全格。</p></div>
+        <div id="template-box" hidden><div class="eyebrow">合法图形 / 允许旋转</div><div id="templates" class="template-list"></div><p class="mini-note">不重叠，不跨棋盘。图形是全局约束。</p></div>
+        <div id="candidate-box" hidden><button id="candidate-toggle" class="candidate-toggle" aria-expanded="false">查看可能的世界 <span id="candidate-count"></span> <span aria-hidden="true">＋</span></button><div id="candidate-gallery" hidden></div></div>
+        <div class="notebook-bottom"><span class="tiny-cross" aria-hidden="true">＋</span><p>好奇心比速度重要。<br>每次理解，都算一次进步。</p></div>
+      </aside>
+    </section>
+    <section class="next-note"><span class="eyebrow">THE NEXT QUESTION</span><p id="next-question">如果数字统计的，是安全格呢？</p><span class="note-arrow" aria-hidden="true">↗</span></section>
+  </main>
+  <footer class="site-footer"><span>换面 / 从认知的建立，到认知的打破</span><a href="https://github.com/DenglinM/Minesweeper/tree/main/huanmian" target="_blank" rel="noopener noreferrer">源代码 ↗</a><span>18 关主线 + 6 关实验扩展 · 本地存档</span></footer>
+  <dialog id="map-dialog" class="map-dialog"><div class="dialog-heading"><div><div class="eyebrow">EXPERIMENT ARCHIVE</div><h2>选择下一种理解。</h2></div><button class="icon-btn dialog-close" aria-label="关闭章节地图">×</button></div><p class="dialog-lead">18 关二维主线，另有方向与空间各 3 关实验扩展。建议依序游玩，也可以自由体验每一章；完成的实验会留下一枚印记。</p><div id="level-map"></div></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><div><div class="eyebrow">A LITTLE GUIDANCE</div><h2>先观察，再确信。</h2></div><button class="icon-btn dialog-close" aria-label="关闭游戏说明">×</button></div><div class="help-content"><p>打开所有安全格，就能完成实验。雷位始终固定，每章会重新定义你看到的线索。</p><div class="help-row"><strong>打开与笔记</strong><p>左键或 Enter 打开；右键或 F 记笔记。触屏可以先选“打开”或“标雷／标安全”，再点格子。笔记只是猜想，不会影响概率。</p></div><div class="help-row"><strong>误判与提示</strong><p>误开雷会确认该格有雷，并记录误判；保留其余进度，可以继续。提示依据已经公开的证据，帮助你找到推理方向。</p></div><div class="help-row"><strong>概率与采样</strong><p>未知格的百分比是它的雷率；已开格上的百分比是未知邻域的平均雷密度。无伤采样返回区域的真实雷数，改变候选和概率。两次是优秀目标，没有硬性次数限制。</p></div><div class="help-row"><strong>方向与空间</strong><p>箭头指向最近的雷群中心，穿过的格子未必是雷。空间实验按固定半径定义邻居，旋转只改变观看方向。</p></div><p class="mini-note">进度仅保存在当前浏览器。隐私模式或清除浏览器数据可能删除存档。音效默认关闭。</p></div></dialog>
+  <dialog id="win-dialog" class="win-dialog"><button class="icon-btn dialog-close win-close" aria-label="关闭完成提示">×</button><div class="win-symbol" aria-hidden="true">✳</div><div class="eyebrow">A NEW UNDERSTANDING</div><h2 id="win-title">原来如此。</h2><p id="win-insight"></p><div id="win-stats" class="win-stats"></div><button id="next-level" class="dark-btn">继续下一个实验 <span aria-hidden="true">→</span></button><button id="win-map" class="text-link">回到章节地图 ↗</button></dialog>
+  <noscript><p class="noscript">这是一款交互游戏，请开启浏览器 JavaScript 后游玩。</p></noscript>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
