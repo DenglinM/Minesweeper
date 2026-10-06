@@ -98,8 +98,8 @@ function positions3D() {
     const maxY = Math.max(...nodes.map(n => n.y));
     return new Map(nodes.map(n => {
       const layer = layers.indexOf(n.z || 0);
-      const yStart = 9 + layer / layers.length * 80;
-      return [n.id, { id:n.id, x:12 + n.x / Math.max(maxX,1) * 76, y:yStart + (1 - n.y / Math.max(maxY,1)) * (62 / layers.length), depth:layer, layer:n.z || 0 }];
+      const yStart = 8 + layer / layers.length * 88;
+      return [n.id, { id:n.id, x:12 + n.x / Math.max(maxX,1) * 76, y:yStart + (1 - n.y / Math.max(maxY,1)) * (42 / layers.length), depth:layer, layer:n.z || 0 }];
     }));
   }
   const rotated = nodes.map(n => {
@@ -177,6 +177,11 @@ function renderBoard() {
         el.setAttribute('aria-label', `${n.id}，安全格，${view === 'negative' ? '安全邻数' : '邻雷数'}${clue.value}，有效邻格${clue.degree}`);
       }
     } else if (mark) { el.textContent = mark === 'safe' ? '✓' : '⚑'; el.classList.add(mark === 'safe' ? 'marked-safe' : 'marked-mine'); }
+    if (spatial) {
+      el.title = `${n.id} · 世界坐标 (${n.x}, ${n.y}, ${n.z || 0})`;
+      if (!opened && !mine && !mark) { el.textContent = n.id; el.classList.add('spatial-unknown'); }
+      else { const label=node('span',n.id,'spatial-id'); label.setAttribute('aria-hidden','true'); el.append(label); }
+    }
     if (neighbors.has(n.id)) el.classList.add('neighbor');
     if (selected === n.id) el.classList.add('selected');
     if (lastHintCells.includes(n.id)) el.classList.add('hint-cell');
@@ -197,7 +202,7 @@ function renderBoard() {
     const zs = [...new Set(currentLevel.nodes.map(n => n.z || 0))].sort((a,b) => a-b);
     zs.forEach((z,i) => {
       const line = node('span', `深度层 ${z}`, 'spatial-layer');
-      line.style.top = `${6 + i / zs.length * 80}%`;
+      line.style.top = `${3 + i / zs.length * 88}%`;
       board.append(line);
     });
   }

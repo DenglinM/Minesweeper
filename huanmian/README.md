@@ -25,8 +25,8 @@ npm start
 
 - 左键或 Enter 打开，右键或 F 记笔记；方向键移动焦点。也可以先选工具再点格子。
 - 负形章的数字统计有效邻格中的安全格；角、边与内部的邻格数量不同。满安全数可以展开，0 安全数意味着邻格全是雷。
-- 图形章依据公开模板、允许的旋转与摆放约束推理。图形笔记和雷旗都是假设，不能成为概率证据。
-- 概率章采用公开的有限候选与均匀先验。未知格的百分比表示本格雷率，已开格的百分比表示未知邻域的平均雷密度。
+- 图形章依据公开模板、允许的旋转与摆放约束推理。个人笔记（雷旗与安全勾）都是假设，不能成为概率证据。
+- 概率章采用公开的有限候选与均匀先验。未知格的百分比表示本格有雷概率，已开格的百分比表示未知邻域的平均雷密度。
 - 无伤采样返回指定区域的真实雷数，并更新候选。两次是优秀评级参考，可以继续采样；不会因次数用尽而卡住主线。
 - 向量章箭头指向最近的固定 2×2 雷簇中心，等距时保留所有方向；沿途的格子未必有雷。
 - 空间章以固定世界坐标和半径定义邻居。旋转只改变观看方向，不能改变邻接关系。
@@ -58,7 +58,7 @@ node tools/verify-levels.mjs
 
 `npm run verify` 验证每张固定手工盘的完整解法，并对概率目录遍历全部初始合法布局和对应结果分支。每一步只根据公开候选选择确定安全格，或选择能区分候选的公开采样区域。它不会用真实雷名单决定下一步操作，逐步检查候选后验和零误判通关，失败时返回非零退出码。报告明确区分“固定关卡”和“全部分支”，不把其他假想手工盘的可解性算入发布承诺。
 
-验算结果列出每关的最坏候选数、采样数与操作数。最坏采样数是当前公开决策策略在所有合法真值上的最坏分支，并非最优策略证明；候选穷举超过 4096 个会明确失败，不会把部分检查报告成完整验证。需要机器可读结果时运行：
+验算结果列出每关的候选峰值、采样数与操作数。固定盘只取当前出题布局的通关路径；目录关的最坏采样数是当前公开决策策略在全部目录真值上的最坏分支，并非最优策略证明。验算范围内的候选超过 4096 个会明确失败，不会把部分检查报告成完整验证。需要机器可读结果时运行：
 
 ```sh
 node tools/verify-levels.mjs --json
@@ -70,11 +70,13 @@ node tools/verify-levels.mjs --json
 
 现有公共仓库 [DenglinM/Minesweeper](https://github.com/DenglinM/Minesweeper) 已配置从 `main` 的根目录发布。沿用这个设置，将本目录作为仓库根目录下的 `huanmian/` 提交，保留其内部相对资源路径即可；无需覆盖仓库原有扫雷页面，也无需新增构建依赖。
 
-提交后在仓库 Actions 查看 Pages 的部署是否成功。发布入口为 [《换面》](https://denglinm.github.io/Minesweeper/huanmian/)，源代码位于 [huanmian 目录](https://github.com/DenglinM/Minesweeper/tree/main/huanmian)。这两个地址是目标入口；是否已上线以最新部署结果和实际加载为准。
+2026-10-07，《换面》已经上线：[立即游玩](https://denglinm.github.io/Minesweeper/huanmian/)。源代码位于 [huanmian 目录](https://github.com/DenglinM/Minesweeper/tree/main/huanmian)。本次部署提交为 `5591caaa`，[Pages 流程 37496514116](https://github.com/DenglinM/Minesweeper/actions/runs/37496514116) 成功。
+
+线上 24 关已通过界面上的公开提示和采样逐关完成，全部零误判。这是使用辅助的浏览器操作验收；与 37 项自动测试、24 关配置验算分别记录，不代表真人独立理解或真人盲测已通过。具体范围见 [玩法验算记录](docs/verification.md)。
 
 发布到其他仓库时，将本目录内容放在选择的 Pages 发布源中，在仓库 Settings → Pages 选择相应分支和目录，再等待部署完成。详见 GitHub 官方的[配置发布源](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)与[创建 Pages 网站](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)说明。
 
-发布前运行测试及验算，再检查网页上的打开、笔记、提示、概率采样、章节解锁、刷新续玩与空间选点。
+未来更新前运行测试及验算，再检查网页上的打开、笔记、提示、概率采样、章节切换、刷新续玩与空间选点；提交后核对仓库 Actions 中的新 Pages 部署，并实际访问线上入口。
 
 ## 文件分工
 
