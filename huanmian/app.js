@@ -49,6 +49,7 @@ function loadGame() {
   rotation = -.28;
   showLayers = false;
   $('spatial-layers').checked = false;
+  $('neighbor-caption').textContent = '选中一格，看看它真正的邻居。';
 }
 function persist() {
   saved.current = currentLevel.id;
