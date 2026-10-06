@@ -7,7 +7,7 @@
   <meta name="description" content="换面：一部关于认知的扫雷游戏。从数字、安全数到图形、概率、方向与空间，重新理解每一条线索。">
   <title>换面 · 重新理解扫雷</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles.css?v=776244dd">
 </head>
 <body>
   <a class="skip-link" href="#board">跳到棋盘</a>
@@ -57,6 +57,6 @@
   <dialog id="help-dialog"><div class="dialog-heading"><div><div class="eyebrow">A LITTLE GUIDANCE</div><h2>先观察，再确信。</h2></div><button class="icon-btn dialog-close" aria-label="关闭游戏说明">×</button></div><div class="help-content"><p>打开所有安全格，就能完成实验。雷位始终固定，每章会重新定义你看到的线索。</p><div class="help-row"><strong>打开与笔记</strong><p>左键或 Enter 打开；右键或 F 记笔记。触屏可以先选“打开”或“标雷／标安全”，再点格子。笔记只是猜想，不会影响概率。</p></div><div class="help-row"><strong>误判与提示</strong><p>误开雷会确认该格有雷，并记录误判；保留其余进度，可以继续。提示依据已经公开的证据，帮助你找到推理方向。</p></div><div class="help-row"><strong>概率与采样</strong><p>未知格的百分比是它的雷率；已开格上的百分比是未知邻域的平均雷密度。无伤采样返回区域的真实雷数，改变候选和概率。两次是优秀目标，没有硬性次数限制。</p></div><div class="help-row"><strong>方向与空间</strong><p>箭头指向最近的雷群中心，穿过的格子未必是雷。空间实验按固定半径定义邻居，旋转只改变观看方向。</p></div><p class="mini-note">进度仅保存在当前浏览器。隐私模式或清除浏览器数据可能删除存档。音效默认关闭。</p></div></dialog>
   <dialog id="win-dialog" class="win-dialog"><button class="icon-btn dialog-close win-close" aria-label="关闭完成提示">×</button><div class="win-symbol" aria-hidden="true">✳</div><div class="eyebrow">A NEW UNDERSTANDING</div><h2 id="win-title">原来如此。</h2><p id="win-insight"></p><div id="win-stats" class="win-stats"></div><button id="next-level" class="dark-btn">继续下一个实验 <span aria-hidden="true">→</span></button><button id="win-map" class="text-link">回到章节地图 ↗</button></dialog>
   <noscript><p class="noscript">这是一款交互游戏，请开启浏览器 JavaScript 后游玩。</p></noscript>
-  <script type="module" src="./app.js"></script>
+  <script type="module" src="./app.js?v=7771cdde"></script>
 </body>
 </html>
