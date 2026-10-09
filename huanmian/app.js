@@ -1,14 +1,16 @@
 import { createGame, reveal, toggleMark, undo, scan, getCandidates, getProbabilities, getClue, getProgress, getHint, serializeGame } from './engine.js';
-import { chapters, levels } from './levels.js';
+import { chapters, levels } from './levels.js?v=20261010-web2';
+import { createWebBoard } from './web-board.js?v=20261010-web2';
 
 const $ = id => document.getElementById(id);
 const STORAGE = 'huanmian-progress-v1';
-const chapterNames = ['数字', '负形', '图形', '概率', '综合', '方向', '空间'];
-const chapterQuestions = ['如果数字统计的，是安全格呢？', '如果你看到的轮廓，也是证据呢？', '如果数字描述的，是你目前知道多少呢？', '你会为低风险，还是新证据做出选择？', '如果箭头指向的，是一个整体呢？', '如果邻居不再由方格决定呢？', '回到数字。你已经换了一种理解。'];
-const ruleTitles = ['数字是可靠的关系', '安全，也能被计数', '轮廓提供新的证据', '概率是当前的知识', '选择合适的视角', '箭头指向一个整体', '重新定义你的邻居'];
-const ruleIcons = { normal: '邻雷数', negative: '安全数', shape: '图形约束 · 邻雷数', probability: '未知邻域平均雷密度', mixed: '两种计数 · 同一事实', vector: '最近雷簇的方向', spatial: '半径邻接 · 邻雷数' };
+const chapterNames = ['数字', '负形', '图形', '概率', '综合', '方向', '空间', '网页'];
+const chapterQuestions = ['如果数字统计的，是安全格呢？', '如果你看到的轮廓，也是证据呢？', '如果数字描述的，是你目前知道多少呢？', '你会为低风险，还是新证据做出选择？', '如果箭头指向的，是一个整体呢？', '如果邻居不再由方格决定呢？', '如果棋盘就是你正在看的网页呢？', '你开始重新理解的，是整个页面。'];
+const ruleTitles = ['数字是可靠的关系', '安全，也能被计数', '轮廓提供新的证据', '概率是当前的知识', '选择合适的视角', '箭头指向一个整体', '重新定义你的邻居', '网页元素，也可以是格子'];
+const ruleIcons = { normal: '邻雷数', negative: '安全数', shape: '图形约束 · 邻雷数', probability: '未知邻域平均雷密度', mixed: '两种计数 · 同一事实', vector: '最近雷簇的方向', spatial: '半径邻接 · 邻雷数', web: '整页探索 · 固定元素关系' };
 const arrowNames = { N:'↑', NE:'↗', E:'→', SE:'↘', S:'↓', SW:'↙', W:'←', NW:'↖' };
 const isRiskLevel = () => currentLevel.mode === 'probability' || (currentLevel.mode === 'mixed' && !!currentLevel.publicCandidates);
+const isWebLevel = () => currentLevel.mode === 'web';
 let storageAvailable = true;
 let saved = { version: 1, current: levels[0].id, completed: [], sessions: {}, sound: false };
 try {
@@ -17,7 +19,9 @@ try {
     saved = { ...saved, ...raw, completed: raw.completed.filter(id => levels.some(l => l.id === id)) };
   }
 } catch { storageAvailable = false; }
-let currentLevel = levels.find(l => l.id === saved.current) || levels[0];
+const requestedLevel = new URLSearchParams(location.search).get('level');
+let currentLevel = levels.find(l => l.id === requestedLevel) || levels.find(l => l.id === saved.current) || levels[0];
+let lastNonWebLevel = currentLevel.mode === 'web' ? 'S03' : currentLevel.id;
 let game;
 let tool = 'open';
 let view = currentLevel.mode === 'negative' ? 'negative' : 'normal';
@@ -27,6 +31,7 @@ let rotation = -.28;
 let showLayers = false;
 let lastHintCells = [];
 let audioContext;
+const pageBoard = createWebBoard({ onAct: act, onInspect: observe, onKey: keyOnCell });
 
 function node(tag, text, className) {
   const el = document.createElement(tag);
@@ -40,6 +45,7 @@ function chapterIndex(level = currentLevel) {
   return found < 0 ? 0 : found;
 }
 function loadGame() {
+  pageBoard.hide();
   try { game = createGame(currentLevel, saved.sessions[currentLevel.id]); }
   catch { game = createGame(currentLevel); }
   tool = 'open';
@@ -61,6 +67,7 @@ function persist() {
 function say(text, type = '') {
   $('message').textContent = text;
   $('message').className = `message ${type}`;
+  pageBoard.status(text);
 }
 function playTone(type = 'open') {
   if (!saved.sound) return;
@@ -132,6 +139,13 @@ function renderSpatialEdges(positions) {
 }
 function renderBoard() {
   const board = $('board');
+  board.hidden = isWebLevel();
+  $('web-guide').hidden = !isWebLevel();
+  if (isWebLevel()) {
+    board.replaceChildren();
+    $('spatial-controls').hidden = true;
+    return;
+  }
   const spatial = currentLevel.mode === 'spatial';
   board.replaceChildren();
   board.className = `board${spatial ? ' spatial' : ''}`;
@@ -209,6 +223,12 @@ function renderBoard() {
   }
 }
 function observe(id) {
+  if (isWebLevel()) {
+    selected = id;
+    const item = currentLevel.nodes.find(n => n.id === id);
+    $('neighbor-caption').textContent = `${item?.label || id} · 公开邻居 ${(currentLevel.neighbors[id] || []).length} 个 · 在网页上高亮或定位`;
+    return;
+  }
   const neighbors = currentLevel.neighbors[id] || [];
   $('board').querySelectorAll('.cell').forEach(el => {
     el.classList.toggle('neighbor', neighbors.includes(el.dataset.node));
@@ -247,6 +267,11 @@ function keyOnCell(e, id) {
   if (!delta) return;
   e.preventDefault();
   const list = currentLevel.nodes;
+  if (isWebLevel()) {
+    const index = list.findIndex(n => n.id === id);
+    pageBoard.locate(list[(index + (delta[0] || delta[1]) + list.length) % list.length].id);
+    return;
+  }
   const from = list.find(n => n.id === id);
   let to = list.find(n => n.x === from.x + delta[0] && n.y === from.y + delta[1] && (n.z || 0) === (from.z || 0));
   if (!to) {
@@ -267,7 +292,8 @@ function act(id, action) {
   else { say(isRiskLevel() ? '安全事实已确认。候选已经按公开证据更新；没有新信息时，数值也可能保持不变。' : '安全格已打开。试着把这条新线索与周围的关系连起来。'); playTone(); }
   render(); persist();
   if (!beforeWon && game.won) finish();
-  $('board').querySelector(`[data-node="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
+  if (isWebLevel()) pageBoard.focus(id);
+  else $('board').querySelector(`[data-node="${CSS.escape(id)}"]`)?.focus({ preventScroll: true });
 }
 function renderTemplates() {
   const templates = currentLevel.templates || [];
@@ -320,6 +346,7 @@ function renderChapters() {
   });
 }
 function render() {
+  if (!isWebLevel()) pageBoard.hide();
   const index = levels.indexOf(currentLevel);
   const chapter = chapterIndex();
   const progress = getProgress(game);
@@ -353,6 +380,16 @@ function render() {
   $('view-controls').querySelectorAll('button').forEach(button => { button.classList.toggle('active',button.dataset.view === view); button.setAttribute('aria-pressed',String(button.dataset.view === view)); });
   $('next-question').textContent = chapterQuestions[chapter] || chapterQuestions[0];
   renderBoard(); renderTemplates(); renderCandidates(); renderChapters();
+  if (isWebLevel()) {
+    $('context-text').textContent = '你一直在阅读这些标题、文案和链接。现在它们也是格子：保留内容，调查关系。';
+    pageBoard.show({
+      cells: currentLevel.nodes.map((n,index) => ({ id:n.id, domId:n.domId, label:n.label, index,
+        opened:game.revealed.has(n.id), mine:game.confirmedMines.has(n.id), mark:game.marks.get(n.id),
+        clue:game.revealed.has(n.id) ? getClue(game,n.id).value : null })),
+      neighbors:currentLevel.neighbors, tool, hintCells:lastHintCells, selected,
+      opened:progress.opened, total:progress.total, mistakes:game.mistakes
+    });
+  }
 }
 function renderMap() {
   $('level-map').replaceChildren();
@@ -377,26 +414,35 @@ function renderMap() {
 function selectLevel(id) {
   const level = levels.find(l => l.id === id);
   if (!level) return;
-  persist(); currentLevel=level; loadGame(); render(); persist();
+  persist(); currentLevel=level; if (level.mode !== 'web') lastNonWebLevel=level.id; loadGame(); render(); persist();
   say(game.won ? '这枚实验印记已经获得。可以重新开始，也可以在章节地图中选择下一关。' : isRiskLevel() ? '先观察候选，再选择一次能带来新证据的采样。雷位始终固定。' : '开局格已经确认安全。观察线索，从一个确定的判断开始。');
-  $('context-text').textContent = currentLevel.mode === 'vector' ? '最近雷簇按欧氏距离定义。方向边界归属见本关规则，小数字为额外计数锚点。' : currentLevel.mode === 'spatial' ? '选择一个节点，查看其完整邻接。旋转只改变观看方向。' : '把当前规则与已确认事实联系起来。你不需要靠运气完成本关。';
-  $('level-title').scrollIntoView({ behavior:'smooth',block:'nearest' });
+  if (!isWebLevel()) $('context-text').textContent = currentLevel.mode === 'vector' ? '最近雷簇按欧氏距离定义。方向边界归属见本关规则，小数字为额外计数锚点。' : currentLevel.mode === 'spatial' ? '选择一个节点，查看其完整邻接。旋转只改变观看方向。' : '把当前规则与已确认事实联系起来。你不需要靠运气完成本关。';
+  if (isWebLevel()) {
+    say(game.won ? '已恢复完成的网页探索。可重开，或退出探索恢复页面导航。' : '网页探索已开启。先调查带数字的主标题与引导编号，查看下方列出的真实邻居。');
+    $('web-guide').scrollIntoView({ behavior:'auto',block:'center' });
+  } else $('level-title').scrollIntoView({ behavior:'smooth',block:'nearest' });
 }
 function finish() {
   if (!saved.completed.includes(currentLevel.id)) saved.completed.push(currentLevel.id);
   persist(); renderChapters(); playTone('win');
   const index = levels.indexOf(currentLevel);
-  $('win-title').textContent = index === levels.length-1 ? '熟悉的数字，新的理解。' : '原来如此。';
+  $('win-title').textContent = isWebLevel() ? '原来，页面就是棋盘。' : index === levels.length-1 ? '熟悉的数字，新的理解。' : '原来如此。';
   $('win-insight').textContent = currentLevel.insight;
   $('win-stats').replaceChildren(node('span',game.mistakes === 0 ? '✓ 零误判' : `${game.mistakes} 次误判`),node('span',`${game.hintsUsed} 次提示`));
   if (currentLevel.scanRegions?.length) $('win-stats').append(node('span',`${game.scans} 次采样`));
-  $('next-level').textContent = index === levels.length-1 ? '回顾全部实验 →' : index === 17 ? '探索方向扩展 →' : '继续下一个实验 →';
+  $('next-level').textContent = index === levels.length-1 ? '回顾全部实验 →' : index === 23 ? '进入网页探索 →' : index === 17 ? '探索方向扩展 →' : '继续下一个实验 →';
   say('所有安全格都已打开。你获得了一种新的理解。','success');
   openDialog('win-dialog');
 }
 function openDialog(id) { const dialog=$(id); if (!dialog.open) dialog.showModal(); }
 $('tool-open').addEventListener('click',() => { tool='open'; render(); });
 $('tool-mark').addEventListener('click',() => { tool='mark'; render(); say('笔记不会透露真值。可以再次标记取消，或用“撤销笔记”返回。'); });
+$('web-open').addEventListener('click',() => $('tool-open').click());
+$('web-mark').addEventListener('click',() => $('tool-mark').click());
+$('web-undo').addEventListener('click',() => $('undo').click());
+$('web-hint').addEventListener('click',() => { $('hint').click(); if (lastHintCells.length) pageBoard.locate(lastHintCells[0]); });
+$('web-focus').addEventListener('click',() => pageBoard.locate(currentLevel.initial[0]));
+$('web-exit').addEventListener('click',() => { selectLevel(lastNonWebLevel); renderMap(); openDialog('map-dialog'); });
 $('restart').addEventListener('click',() => { delete saved.sessions[currentLevel.id]; loadGame(); render(); persist(); say('棋盘已重开，布局保持固定。之前的误判与采样计数清零。'); });
 $('undo').addEventListener('click',() => { const result=undo(game); render(); persist(); say(result?.ok ? '已撤销一次笔记。已经观察到的事实继续保留。' : result?.reason || '目前没有可以撤销的笔记。'); });
 $('hint').addEventListener('click',() => {
@@ -448,4 +494,4 @@ $('next-level').addEventListener('click',() => {
 $('win-map').addEventListener('click',() => { $('win-dialog').close(); renderMap(); openDialog('map-dialog'); });
 window.addEventListener('pagehide',persist);
 loadGame(); render(); persist(); updateSound();
-say(game.won ? '已恢复完成的实验。打开章节地图继续，或重新开始。' : '开局格已经确认安全。观察数字与邻域，从一个确定的判断开始。');
+say(game.won ? '已恢复完成的实验。打开章节地图继续，或重新开始。' : isWebLevel() ? '网页探索已开启。带编号的真实页面元素就是格子；先选中已安全的主标题，查看它的邻居。' : '开局格已经确认安全。观察数字与邻域，从一个确定的判断开始。');

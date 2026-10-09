@@ -7,7 +7,8 @@ export const chapters = [
   {id:3,label:'第四章',title:'概率是当前知识',description:'雷没有移动，改变的是我们知道多少。',color:'#b99ae5',modes:['probability']},
   {id:4,label:'综合章',title:'选择你的理解',description:'让线索的含义决定下一步。',color:'#eaad91',modes:['mixed']},
   {id:5,label:'向量扩展',title:'箭头之外',description:'方向指向雷簇中心，可以穿过安全格。',color:'#83bde1',modes:['vector']},
-  {id:6,label:'空间扩展',title:'邻居由规则定义',description:'三维距离决定邻接，投影距离不能代替它。',color:'#98adc8',modes:['spatial']}
+  {id:6,label:'空间扩展',title:'邻居由规则定义',description:'三维距离决定邻接，投影距离不能代替它。',color:'#98adc8',modes:['spatial']},
+  {id:7,label:'第八章',title:'网页也是棋盘',description:'调查真实页面元素，用固定关系读懂最后一张棋盘。',color:'#e1bd8e',modes:['web']}
 ];
 
 const id = (x,y) => `r${y+1}c${x+1}`;
@@ -54,6 +55,64 @@ function spatial(data,columns,layers,radius,special=false) {
   return level;
 }
 
+function webLevel() {
+  const elements = [
+    ['brand','顶部品牌','web-brand'],
+    ['hero-title','主标题','intro-title'],
+    ['hero-copy','主标题说明','intro-copy'],
+    ['intro-index','引导编号','intro-index'],
+    ['intro-copy','引导说明','intro-note-copy'],
+    ['explore','章节入口','explore-open'],
+    ['level-title','关卡标题','level-title'],
+    ['level-copy','关卡说明','level-description'],
+    ['rule-title','规则标题','rule-title'],
+    ['rule-copy','规则正文','rule-text'],
+    ['context','上下文说明','context-text'],
+    ['next','下一步入口','next-question'],
+    ['footer-brand','页尾品牌','footer-brand'],
+    ['source','源代码链接','source-link']
+  ];
+  // These coordinates are stable identifiers for tooling, not DOM positions.
+  // Adjacency comes only from the published semantic edge list below.
+  const nodes = elements.map(([id,label,domId],index)=>({id,label,domId,x:index%4,y:Math.floor(index/4)}));
+  const graphEdges = [
+    ['brand','hero-title'],
+    ['brand','footer-brand'],
+    ['hero-title','hero-copy'],
+    ['hero-title','intro-index'],
+    ['hero-copy','intro-copy'],
+    ['intro-index','intro-copy'],
+    ['intro-copy','explore'],
+    ['explore','level-title'],
+    ['level-title','level-copy'],
+    ['level-copy','rule-title'],
+    ['level-copy','context'],
+    ['rule-title','rule-copy'],
+    ['rule-copy','context'],
+    ['context','next'],
+    ['next','footer-brand'],
+    ['footer-brand','source'],
+    ['source','rule-copy']
+  ];
+  const neighbors = Object.fromEntries(nodes.map(node=>[node.id,[]]));
+  for (const [a,b] of graphEdges) { neighbors[a].push(b); neighbors[b].push(a); }
+  const graphRule = '本页公开的 17 条关系连接标题与说明、引导与入口、关卡与规则、上下文与下一步，以及顶部／页尾品牌和源代码依据。关系双向，不包含元素自己；只有具名邻居列表中的元素才相邻。页面滚动、换行、缩放、窗口大小和元素距离都不改变关系。';
+  return {
+    id:'W01',title:'棋盘之外，关系仍在',chapter:7,mode:'web',nodes,neighbors,
+    mines:['hero-copy','intro-copy','level-copy'],totalMines:3,
+    initial:['hero-title','intro-index','next'],
+    description:'这次没有方格棋盘：页面的文字、标题和入口就是可调查元素。先选中一个元素查看邻居，再根据公开数字确认安全。',
+    rule:'共有 14 个网页元素、3 雷。已调查元素的数字统计固定关系图中的邻雷数；0 表示全部具名邻居安全，可以展开。'+graphRule+' 标记是可撤销的笔记；调查才会公开事实，误判后仍可继续。',
+    insight:'扫雷需要的是稳定关系和诚实线索；格子可以是一段文字、一个标题或一个网页入口。',
+    hints:[
+      '引导编号的 1 只连接主标题与引导说明。主标题已安全，因此引导说明有雷。下一步入口的 0 则保证上下文说明和页尾品牌都安全。',
+      '调查上下文说明后，将它的 1 与主标题的 1、已经确定的引导说明共同对照：三份独立关系已经用完本页的 3 个雷名额。',
+      '关卡标题只连接章节入口与关卡说明。先证明章节入口安全，再用新数字确认关卡说明；页尾品牌的 0 可以验证顶部品牌。'
+    ],
+    meta:{difficulty:'网页关系图',graphEdges,graphRule,initialCandidateCount:12}
+  };
+}
+
 export const levels = [
   make({id:'01',title:'一个数字，一种关系',chapter:0,mode:'normal',size:3,mineCells:[[0,0]],initialCells:[[1,0],[2,1]],description:'观察右侧的 0：它承诺周围没有雷。',rule:normalRule,insight:'数字不是这一格的危险等级，而是周围雷的数量。',hints:['先找 0，再看它的全部邻格。'],meta:{difficulty:'入门'}}),
   make({id:'02',title:'边界也有自己的数量',chapter:0,mode:'normal',size:4,mineCells:[[0,0],[2,1],[3,3]],initialCells:[[1,0],[0,2],[3,0]],description:'角落只有三个邻格；先用已知安全格缩小范围。',rule:normalRule,insight:'相同数字放在不同位置，约束的是不同数量的邻格。',hints:['边角线索也可靠，但它的邻域比内部小。'],meta:{difficulty:'基础'}}),
@@ -78,5 +137,6 @@ export const levels = [
   vector({id:'V03',title:'一样近，就一起显示',size:6,mineCells:[...square(0,0),...square(3,0)],initialCells:[[2,4]],numberAnchorCells:[[2,4]],description:'两个固定雷簇；中线锚点到两个中心一样近，会同时给出箭头。',insight:'平局不是错误线索；方向与数字锚点可以共同证明安全。',hints:['中线上的两支箭头代表两簇等距，不能只选其中一支来推理。'],meta:{difficulty:'平局与联合推理'}}),
   spatial({id:'S01',title:'重叠投影，分开的邻居',titleShort:'半径邻接',mines:['P02','P10'],initial:['P01','P06'],description:'P01 与 P07 投影很近，但三维距离超过半径；切换深度看它们。',insight:'屏幕上靠近，不等于三维规则中的邻居。',hints:['选中 P01 检查真实邻接线；它与 P07 不相邻。'],meta:{difficulty:'12 节点'}},3,2,1.12,true),
   spatial({id:'S02',title:'前后层也可以相邻',mines:['P03','P09','P15'],initial:['P01','P08','P16'],description:'相隔前后层的节点，若三维距离在半径内，仍然互为邻居。',insight:'邻接可以跨层，视图的分组不改变数字。',hints:['z 相差 0.8、x/y 相同的两节点相邻；同时查看它们各自的平面邻居。'],meta:{difficulty:'16 节点'}},4,2,1.05),
-  spatial({id:'S03',title:'回到数字，换了邻居',mines:['P02','P08','P14','P20'],initial:['P01','P05','P11','P16'],description:'用固定半径图完成空间清盘。现在你知道：数字可靠，但邻居需要先定义。',insight:'认知被打破后，关系仍然诚实；你学会的是重新读懂它。',hints:['两个节点的邻域可能重叠；在三维图上也能使用第一章的联合约束。'],meta:{difficulty:'20 节点'}},5,2,1.05)
+  spatial({id:'S03',title:'回到数字，换了邻居',mines:['P02','P08','P14','P20'],initial:['P01','P05','P11','P16'],description:'用固定半径图完成空间清盘。现在你知道：数字可靠，但邻居需要先定义。',insight:'认知被打破后，关系仍然诚实；你学会的是重新读懂它。',hints:['两个节点的邻域可能重叠；在三维图上也能使用第一章的联合约束。'],meta:{difficulty:'20 节点'}},5,2,1.05),
+  webLevel()
 ];
